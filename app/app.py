@@ -35,7 +35,7 @@ def create_app():
 
     @app.route('/api/sessions', methods=['POST'])
     def sessions():
-        host_url = request.host_url 
+        host_url = request.host_url
 
         return adyen_sessions(host_url)
 
@@ -72,7 +72,7 @@ def create_app():
         # fetch first( and only) NotificationRequestItem
         notification = notifications[0]
 
-        if is_valid_hmac_notification(notification['NotificationRequestItem'], get_adyen_hmac_key()) :
+        if is_valid_hmac_notification(notification['NotificationRequestItem'], get_adyen_hmac_key()):
             # consume event asynchronously
             consume_event(notification)
         else:
@@ -80,6 +80,36 @@ def create_app():
             raise Exception("Invalid HMAC signature")
 
         return '[accepted]'
+
+    @app.route('/api/webhooks/relayedAuth', methods=['POST'])
+    def relayedAuth_notification():
+        """
+        Receives outcome of each payment
+        :return:
+        """
+        APPROVE = {
+            "authorisationDecision": {
+                "status": "Authorised"
+            },
+            "reference": "myBalancePlatformPayment_12345",
+            "metadata": {
+                "customId": "your-own-custom-field-12345"
+            }
+        }
+
+        DECLINE = {
+            "authorisationDecision": {
+                "status": "Refused"
+            },
+            "reference": "myBalancePlatformPayment_12345",
+            "metadata": {
+                "customId": "your-own-custom-field-12345"
+            }
+        }
+        relayed_auth = request.get_json()
+        print(relayed_auth)
+
+        return APPROVE
 
     @app.route('/favicon.ico')
     def favicon():
@@ -106,5 +136,3 @@ if __name__ == '__main__':
 
     logging.info(f"Running on http://localhost:{get_port()}")
     web_app.run(debug=True, port=get_port(), host='0.0.0.0')
-
-
