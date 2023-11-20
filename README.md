@@ -4,7 +4,7 @@
 
 * Open your [Adyen Test Account](https://ca-test.adyen.com/ca/ca/overview/default.shtml) and create a set of [API keys](https://docs.adyen.com/user-management/how-to-get-the-api-key).
 * Go to [Gitpod account variables](https://gitpod.io/variables).
-* Set the `ADYEN_HMAC_KEY` and `ADYEN_BALANCE_PLATFORM` variables. Currently HMAC isn't used for relayedAuth so add a dummy value.
+* Set the `ADYEN_HMAC_KEY` and `ADYEN_BALANCE_PLATFORM` variables. Currently, HMAC isn't used for relayedAuth so add a dummy value.
 * Click the button below.
 
 [![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/tddouglas/relayedAuth-gitpod)

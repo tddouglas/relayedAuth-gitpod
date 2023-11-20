@@ -21,26 +21,7 @@ def create_app():
     def home():
         return render_template('home.html')
 
-    # Process incoming webhook notifications
-    @app.route('/api/webhooks/notifications', methods=['POST'])
-    def webhook_notifications():
-        """
-        Receives outcome of each payment
-        :return:
-        """
-        notifications = request.json['notificationItems']
-        # fetch first( and only) NotificationRequestItem
-        notification = notifications[0]
-
-        if is_valid_hmac_notification(notification['NotificationRequestItem'], get_adyen_hmac_key()):
-            # consume event asynchronously
-            consume_event(notification)
-        else:
-            # invalid hmac: do not send [accepted] response
-            raise Exception("Invalid HMAC signature")
-
-        return '[accepted]'
-
+    # Relayed Auth Behavior
     @app.route('/api/webhooks/relayedAuth', methods=['POST'])
     def relayedAuth_notification():
         """
@@ -70,6 +51,28 @@ def create_app():
         print(relayed_auth)
 
         return APPROVE
+
+    # Process incoming webhook notifications
+    @app.route('/api/webhooks/notifications', methods=['POST'])
+    def webhook_notifications():
+        """
+        Receives outcome of each payment
+        :return:
+        """
+        notifications = request.json['notificationItems']
+        # fetch first( and only) NotificationRequestItem
+        notification = notifications[0]
+
+        if is_valid_hmac_notification(notification['NotificationRequestItem'], get_adyen_hmac_key()):
+            # consume event asynchronously
+            consume_event(notification)
+        else:
+            # invalid hmac: do not send [accepted] response
+            raise Exception("Invalid HMAC signature")
+
+        return '[accepted]'
+
+
 
     @app.route('/favicon.ico')
     def favicon():
