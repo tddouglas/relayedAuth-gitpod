@@ -3,40 +3,14 @@
 ## Run this integration in seconds using [Gitpod](https://gitpod.io/)
 
 * Open your [Adyen Test Account](https://ca-test.adyen.com/ca/ca/overview/default.shtml) and create a set of [API keys](https://docs.adyen.com/user-management/how-to-get-the-api-key).
-* Go to [gitpod account variables](https://gitpod.io/variables).
-* Set the `ADYEN_API_KEY`, `ADYEN_CLIENT_KEY`, `ADYEN_HMAC_KEY` and `ADYEN_MERCHANT_ACCOUNT variables`.
+* Go to [Gitpod account variables](https://gitpod.io/variables).
+* Set the `ADYEN_HMAC_KEY` and `ADYEN_BALANCE_PLATFORM` variables. Currently HMAC isn't used for relayedAuth so add a dummy value.
 * Click the button below.
 
 [![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/tddouglas/relayedAuth-gitpod)
 
-_NOTE: To allow the Adyen Drop-In and Components to load, you have to add `https://*.gitpod.io` as allowed origin for your chosen set of [API Credentials](https://ca-test.adyen.com/ca/ca/config/api_credentials_new.shtml)_
-
 ## Details
-
-This repository includes examples of PCI-compliant UI integrations for online payments with Adyen. Within this demo app, we've created a simplified version of an e-commerce website, complete with commented code to highlight key features and concepts of Adyen's API. Check out the underlying code to see how you can integrate Adyen to give your shoppers the option to pay with their preferred payment methods, all in a seamless checkout experience.
-
-![Card Checkout Demo](app/static/img/cardcheckout.gif)
-
-## Supported Integrations
-
-
-[Online payments](https://docs.adyen.com/online-payments) **Python with Flask** demos of the following client-side integrations are available in this repository:
-
-- Drop-in
-- Components
-  - ACH
-  - Alipay
-  - Boleto
-  - Card
-  - Dotpay
-  - Giropay
-  - iDEAL
-  - Klarna
-  - PayPal
-  - SEPA Direct Debit
-  - Sofort
-
-The Demo leverages Adyen's API Library for Python [GitHub](https://github.com/Adyen/adyen-python-api-library) | [Docs](https://github.com/Adyen/adyen-python-api-library).
+A simple relayed auth listener - intended to be launched via gitpod and hardcoded to approve relayed auth transactions.
 
 ## Requirements
 
@@ -46,95 +20,26 @@ The Demo leverages Adyen's API Library for Python [GitHub](https://github.com/Ad
   - uuid
   - Adyen v8.0.0 or higher
 
-## Installation
+## Gitpod Usage
 
-1. Clone this repo
+RelayedAuth delivers asynchronous notifications during issuing auth events. It is important to test them during the setup of your integration. You can find more information about relayed auth [here](https://docs.adyen.com/issuing/authorisation/relayed-authorisation/).
 
-```
-git clone https://github.com/adyen-examples/adyen-python-online-payments.git
-```
+This sample application provides a simple relayed auth endpoint exposed at `/api/webhooks/relayedAuth`. For it to work, you need to:
 
-2. Run `source ./setup.sh` to:
-   - Create and activate a virtual environment
-   - Download the necessary python dependencies
-
-3. Create a `.env` file with all required configuration
-
-   - PORT (default 8080)
-   - [API key](https://docs.adyen.com/user-management/how-to-get-the-api-key)
-   - [Client Key](https://docs.adyen.com/user-management/client-side-authentication)
-   - [Merchant Account](https://docs.adyen.com/account/account-structure)
-   - [HMAC Key](https://docs.adyen.com/development-resources/webhooks/verify-hmac-signatures)
-
-Remember to include `http://localhost:8080` in the list of Allowed Origins
-
-```
-    PORT=8080
-    ADYEN_API_KEY="your_API_key_here"
-    ADYEN_MERCHANT_ACCOUNT="your_merchant_account_here"
-    ADYEN_CLIENT_KEY="your_client_key_here"
-    ADYEN_HMAC_KEY="your_hmac_key_here"
-```
-
-## Usage
-1. Run `./start.sh` to:
-   - Initialize the required environment variables. This step is necessary every time you re-activate your venv
-   - Start Python app
-
-2. Visit [http://localhost:8080](http://localhost:8080) and select an integration type.
-
-To try out integrations with test card numbers and payment method details, see [Test card numbers](https://docs.adyen.com/development-resources/test-cards/test-card-numbers).
-
-## Testing webhooks
-
-Webhooks deliver asynchronous notifications and it is important to test them during the setup of your integration. You can find more information about webhooks in [this detailed blog post](https://www.adyen.com/blog/Integrating-webhooks-notifications-with-Adyen-Checkout).
-
-This sample application provides a simple webhook integration exposed at `/api/webhooks/notifications`. For it to work, you need to:
-
-1. Provide a way for the Adyen platform to reach your running application
-2. Add a Standard webhook in your Customer Area
+1. Be running this repo via Gitpod
+2. Setup Adyen's BankBO relayed auth endpoint to point to your Gitpod instance. 
 
 ### Making your server reachable
+Your endpoint that will consume the incoming relayed auth message must be publicly accessible.
 
-Your endpoint that will consume the incoming webhook must be publicly accessible.
-
-There are typically 3 options:
-* deploy on your own cloud provider
-* deploy on Gitpod
-* expose your localhost with tunneling software (i.e. ngrok)
-
-#### Option 1: cloud deployment
-If you deploy on your cloud provider (or your own public server) the webhook URL will be the URL of the server 
-```
-  https://{cloud-provider}/api/webhooks/notifications
-```
-
-#### Option 2: Gitpod
-If you use Gitpod the webhook URL will be the host assigned by Gitpod
+When using Gitpod, the webhook URL will be the host assigned by Gitpod
 ```
   https://myorg-myrepo-y8ad7pso0w5.ws-eu75.gitpod.io/api/webhooks/notifications
 ```
 **Note:** when starting a new Gitpod workspace the host changes, make sure to **update the Webhook URL** in the Customer Area
 
-#### Option 3: localhost via tunneling software
-If you use a tunneling service like [ngrok](ngrok) the webhook URL will be the generated URL (ie `https://c991-80-113-16-28.ngrok.io`)
-
-```bash
-  $ ngrok http 8080
-  
-  Session Status                online                                                                                           
-  Account                       ############                                                                      
-  Version                       #########                                                                                          
-  Region                        United States (us)                                                                                 
-  Forwarding                    http://c991-80-113-16-28.ngrok.io -> http://localhost:8080                                       
-  Forwarding                    https://c991-80-113-16-28.ngrok.io -> http://localhost:8080           
-```
-
-**Note:** when restarting ngrok a new URL is generated, make sure to **update the Webhook URL** in the Customer Area
-
-### Set up a webhook
-
-* In the Customer Area go to Developers -> Webhooks and create a new 'Standard notification' webhook.
+### Set up relayed auth
+* In Bank BO go to Issuing -> Relayed Auth and create a new 'Standard notification' webhook.
 * Enter the URL of your application/endpoint (see options [above](#making-your-server-reachable))
 * Define username and password for Basic Authentication
 * Generate the HMAC Key

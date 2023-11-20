@@ -21,46 +21,6 @@ def create_app():
     def home():
         return render_template('home.html')
 
-    @app.route('/cart/<integration>')
-    def cart(integration):
-        return render_template('cart.html', method=integration)
-
-    @app.route('/checkout/<integration>')
-    def checkout(integration):
-
-        if integration in get_supported_integration():
-            return render_template('component.html', method=integration, client_key=get_adyen_client_key())
-        else:
-            abort(404)
-
-    @app.route('/api/sessions', methods=['POST'])
-    def sessions():
-        host_url = request.host_url
-
-        return adyen_sessions(host_url)
-
-    @app.route('/result/success', methods=['GET'])
-    def checkout_success():
-        return render_template('checkout-success.html')
-
-    @app.route('/result/failed', methods=['GET'])
-    def checkout_failure():
-        return render_template('checkout-failed.html')
-
-    @app.route('/result/pending', methods=['GET'])
-    def checkout_pending():
-        return render_template('checkout-success.html')
-
-    @app.route('/result/error', methods=['GET'])
-    def checkout_error():
-        return render_template('checkout-failed.html')
-
-    # Handle redirect (required for some payment methods)
-    @app.route('/redirect', methods=['POST', 'GET'])
-    def redirect():
-
-        return render_template('component.html', method=None, client_key=get_adyen_client_key())
-
     # Process incoming webhook notifications
     @app.route('/api/webhooks/notifications', methods=['POST'])
     def webhook_notifications():
