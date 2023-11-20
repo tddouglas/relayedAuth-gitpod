@@ -34,7 +34,7 @@ Your endpoint that will consume the incoming relayed auth message must be public
 
 When using Gitpod, the webhook URL will be the host assigned by Gitpod
 ```
-  https://myorg-myrepo-y8ad7pso0w5.ws-eu75.gitpod.io/api/webhooks/notifications
+  https://808myorg-myrepo-y8ad7pso0w5.ws-eu75.gitpod.io/api/webhooks/notifications
 ```
 **Note:** when starting a new Gitpod workspace the host changes, make sure to **update the Webhook URL** in the Customer Area
 

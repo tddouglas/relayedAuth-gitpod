@@ -1,9 +1,8 @@
 import logging
 
 from Adyen.util import is_valid_hmac_notification
-from flask import Flask, render_template, send_from_directory, request, abort
+from flask import Flask, render_template, send_from_directory, request
 
-from main.sessions import adyen_sessions
 from main.config import *
 
 

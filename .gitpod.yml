@@ -9,7 +9,8 @@ tasks:
 
 # exposed ports
 ports:
-- port: 8080
+- name: Web App
+  port: 8080
   onOpen: open-preview
   visibility: public
 
