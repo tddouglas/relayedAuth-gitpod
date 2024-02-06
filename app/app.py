@@ -1,5 +1,8 @@
+import binascii
 import logging
-
+import hmac
+import hashlib
+import base64
 from Adyen.util import is_valid_hmac_notification
 from flask import Flask, render_template, send_from_directory, request
 
@@ -46,10 +49,33 @@ def create_app():
                 "customId": "your-own-custom-field-12345"
             }
         }
-        relayed_auth = request.get_json()
-        print(relayed_auth)
+        relayed_auth_body = request.get_json()
+        print(request.headers)
+        hmac_request_header = request.headers["hmacsignature"]
+        if checkHmac(relayed_auth_body, get_adyen_relayed_auth_hmac_key(), hmac_request_header):
+            print(relayed_auth_body)
 
-        return APPROVE
+            # 9.99 is magic amount to trigger relayed auth decline# 9.99 is magic amount to trigger relayed auth decline
+            if abs(int(relayed_auth_body["amount"]["value"])) == 999:
+                return DECLINE
+            else:
+                return APPROVE
+
+    def checkHmac(payload, hmac_key, hmac_sig):
+        # payload is the request body as it is
+        # hmac_key is the secret
+        # hmac_sig is the signature from the header
+        hmac_key = binascii.a2b_hex(hmac_key)
+        # Calculate signature
+        calculatedHmac = hmac.new(hmac_key, payload.encode('utf-8'), hashlib.sha256).digest()
+        calculatedHmac_b64 = base64.b64encode(calculatedHmac)
+
+        receivedHmac_b64 = hmac_sig.encode('utf-8')
+        validSignature = hmac.compare_digest(receivedHmac_b64, calculatedHmac_b64)
+
+        if not validSignature:
+            print('HMAC is invalid: {} {}'.format(receivedHmac_b64, calculatedHmac_b64))
+            return False
 
     # Process incoming webhook notifications
     @app.route('/api/webhooks/notifications', methods=['POST'])
@@ -70,8 +96,6 @@ def create_app():
             raise Exception("Invalid HMAC signature")
 
         return '[accepted]'
-
-
 
     @app.route('/favicon.ico')
     def favicon():

@@ -45,6 +45,15 @@ def get_adyen_hmac_key():
     return adyen_hmac_key
 
 
+def get_adyen_relayed_auth_hmac_key():
+    adyen_hmac_key = os.environ.get("ADYEN_RELAYED_AUTH_HMAC_KEY")
+
+    if not adyen_hmac_key:
+        raise Exception("Missing ADYEN_RELAYED_AUTH_HMAC_KEY in .env")
+
+    return adyen_hmac_key
+
+
 def get_supported_integration():
     return ['dropin', 'card', 'ideal', 'klarna', 'directEbanking', 'alipay', 'boletobancario',
             'sepadirectdebit', 'dotpay', 'giropay', 'ach', 'paypal', 'applepay',
