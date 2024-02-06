@@ -10,7 +10,7 @@
 [![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/tddouglas/relayedAuth-gitpod)
 
 ## Details
-A simple relayed auth listener - intended to be launched via gitpod and hardcoded to approve relayed auth transactions.
+A simple relayed auth listener - intended to be launched via gitpod and hardcoded to approve all relayed auth transactions except when amount = 9.99. That magic value will result in relayedAuth declines.
 
 ## Requirements
 
@@ -27,7 +27,7 @@ RelayedAuth delivers asynchronous notifications during issuing auth events. It i
 This sample application provides a simple relayed auth endpoint exposed at `/api/webhooks/relayedAuth`. For it to work, you need to:
 
 1. Be running this repo via Gitpod
-2. Setup Adyen's BankBO relayed auth endpoint to point to your Gitpod instance. 
+2. Setup your relayed auth endpoint to point to your Gitpod instance via the Adyen BPCA. 
 
 ### Making your server reachable
 Your endpoint that will consume the incoming relayed auth message must be publicly accessible.
@@ -39,12 +39,11 @@ When using Gitpod, the webhook URL will be the host assigned by Gitpod
 **Note:** when starting a new Gitpod workspace the host changes, make sure to **update the Webhook URL** in the Customer Area
 
 ### Set up relayed auth
-* In Bank BO go to Issuing -> Relayed Auth and create a new 'Standard notification' webhook.
+* In BPCA go to Issuing -> Relayed Auth
 * Enter the URL of your application/endpoint (see options [above](#making-your-server-reachable))
-* Define username and password for Basic Authentication
+* Define username and password for Basic Authentication (Not implemented yet)
 * Generate the HMAC Key
-* Optionally, in Additional Settings, add the data you want to receive. A good example is 'Payment Account Reference'.
-* Make sure the webhook is **Enabled** (therefore it can receive the notifications)
+* Make sure to Save the config after modifying the URL
 
 That's it! Every time you perform a new payment, your application will receive a notification from the Adyen platform.
 

@@ -59,8 +59,10 @@ def create_app():
 
             # 9.99 is magic amount to trigger relayed auth decline# 9.99 is magic amount to trigger relayed auth decline
             if abs(int(relayed_auth_json["amount"]["value"])) == 999:
+                print("Declining transaction as magic value was used")
                 return DECLINE
             else:
+                print("Approving transaction")
                 return APPROVE
 
     def checkHmac(payload, hmac_key, hmac_sig):
