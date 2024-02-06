@@ -51,7 +51,7 @@ def create_app():
         }
         relayed_auth_body = request.get_json()
         print(request.headers)
-        hmac_request_header = request.headers["hmacsignature"]
+        hmac_request_header = request.headers["Hmacsignature"]
         if checkHmac(relayed_auth_body, get_adyen_relayed_auth_hmac_key(), hmac_request_header):
             print(relayed_auth_body)
 
