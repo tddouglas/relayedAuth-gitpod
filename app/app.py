@@ -49,14 +49,16 @@ def create_app():
                 "customId": "your-own-custom-field-12345"
             }
         }
-        relayed_auth_body = request.get_json()
+        relayed_auth_string = request.get_data(as_text=True)
         print(request.headers)
+        relayed_auth_json = request.get_json()
+        print(relayed_auth_json)
+
         hmac_request_header = request.headers["Hmacsignature"]
-        if checkHmac(relayed_auth_body, get_adyen_relayed_auth_hmac_key(), hmac_request_header):
-            print(relayed_auth_body)
+        if checkHmac(relayed_auth_string, get_adyen_relayed_auth_hmac_key(), hmac_request_header):
 
             # 9.99 is magic amount to trigger relayed auth decline# 9.99 is magic amount to trigger relayed auth decline
-            if abs(int(relayed_auth_body["amount"]["value"])) == 999:
+            if abs(int(relayed_auth_json["amount"]["value"])) == 999:
                 return DECLINE
             else:
                 return APPROVE
