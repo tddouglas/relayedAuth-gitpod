@@ -64,20 +64,26 @@ def create_app():
                 return APPROVE
 
     def checkHmac(payload, hmac_key, hmac_sig):
-        # payload is the request body as it is
-        # hmac_key is the secret
-        # hmac_sig is the signature from the header
+        """
+        Receives outcome of each payment
+        :param payload: Request body represented as a string
+        :param hmac_key: secret HMAC key generated in BPCA
+        :param hmac_sig: HMAC signature in notification header
+        :return: True if HMAC secret key matches key in notification header
+        """
+
         hmac_key = binascii.a2b_hex(hmac_key)
         # Calculate signature
         calculatedHmac = hmac.new(hmac_key, payload.encode('utf-8'), hashlib.sha256).digest()
         calculatedHmac_b64 = base64.b64encode(calculatedHmac)
-
         receivedHmac_b64 = hmac_sig.encode('utf-8')
         validSignature = hmac.compare_digest(receivedHmac_b64, calculatedHmac_b64)
 
         if not validSignature:
             print('HMAC is invalid: {} {}'.format(receivedHmac_b64, calculatedHmac_b64))
             return False
+
+        return True
 
     # Process incoming webhook notifications
     @app.route('/api/webhooks/notifications', methods=['POST'])

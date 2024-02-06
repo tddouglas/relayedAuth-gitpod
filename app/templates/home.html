@@ -4,24 +4,8 @@
         <div class="info">
             <h1>Select Relayed Auth Behavior</h1>
             <p>Click to change the approval or decline logic of your relayed auth server.</p>
-            <p>To learn more about configurating relayed Auth check out our documentation <a
+            <p>To learn more about configuration relayed Auth check out our documentation <a
                     href="https://docs.adyen.com/issuing/authorisation/relayed-authorisation/">here.</a></p>
         </div>
-        <ul class="integration-list">
-            <li class="integration-list-item">
-                <a class="integration-list-item-link" href="{{ url_for('cart', integration="dropin") }}">
-                    <div class="title-container">
-                        <p class="integration-list-item-title">Approve</p>
-                    </div>
-                </a>
-            </li>
-            <li class="integration-list-item">
-                <a class="integration-list-item-link" href="{{ url_for('cart', integration="card") }}">
-                    <div class="title-container">
-                        <p class="integration-list-item-title">Decline</p>
-                    </div>
-                </a>
-            </li>
-        </ul>
     </div>
 {% endblock %}
