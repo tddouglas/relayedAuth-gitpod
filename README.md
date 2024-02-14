@@ -4,7 +4,7 @@
 
 * Open your [Adyen Test Account](https://ca-test.adyen.com/ca/ca/overview/default.shtml) and create a set of [API keys](https://docs.adyen.com/user-management/how-to-get-the-api-key).
 * Go to [Gitpod account variables](https://gitpod.io/variables).
-* Set the `ADYEN_HMAC_KEY`, `ADYEN_RELAYED_AUTH_HMAC_KEY`, and `ADYEN_BALANCE_PLATFORM` variables. Currently, HMAC isn't used for relayedAuth so add a dummy value.
+* Set the `ADYEN_HMAC_KEY`, `ADYEN_RELAYED_AUTH_HMAC_KEY`, and `ADYEN_BALANCE_PLATFORM` variables.
 * Click the button below.
 
 [![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/tddouglas/relayedAuth-gitpod)
@@ -30,11 +30,14 @@ This sample application provides a simple relayed auth endpoint exposed at `/api
 2. Setup your relayed auth endpoint to point to your Gitpod instance via the Adyen BPCA. 
 
 ### Making your server reachable
-Your endpoint that will consume the incoming relayed auth message must be publicly accessible.
-
-When using Gitpod, the webhook URL will be the host assigned by Gitpod
+Your endpoint that will consume the incoming relayed auth message must be publicly accessible. To easily enabled this, click the "Open in gitpod" button. 
+When launching a gitpod instance, it will be hosted on a URL like:
 ```
-  https://808myorg-myrepo-y8ad7pso0w5.ws-eu75.gitpod.io/api/webhooks/notifications
+https://tddouglas-relayedauthgi-1bemp1hw5t3.ws-us108.gitpod.io/
+```
+You will need to take that url and prepend the specific port forwarding info (`8080-`) and append the relayedAuth listener path. The final URL you enter into the Customer Area should look like the below:
+```
+https://8080-tddouglas-relayedauthgi-1bemp1hw5t3.ws-us108.gitpod.io/api/webhooks/relayedAuth
 ```
 **Note:** when starting a new Gitpod workspace the host changes, make sure to **update the Webhook URL** in the Customer Area
 
