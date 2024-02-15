@@ -2,7 +2,6 @@
 
 ## Run this integration in seconds using [Gitpod](https://gitpod.io/)
 
-* Open your [Adyen Test Account](https://ca-test.adyen.com/ca/ca/overview/default.shtml) and create a set of [API keys](https://docs.adyen.com/user-management/how-to-get-the-api-key).
 * Go to [Gitpod account variables](https://gitpod.io/variables).
 * Set the `ADYEN_HMAC_KEY`, `ADYEN_RELAYED_AUTH_HMAC_KEY`, and `ADYEN_BALANCE_PLATFORM` variables.
 * Click the button below.
