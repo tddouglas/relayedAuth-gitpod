@@ -50,6 +50,7 @@ def create_app():
             }
         }
         relayed_auth_string = request.get_data(as_text=True)
+
         print(request.headers)
         relayed_auth_json = request.get_json()
         print(relayed_auth_json)
