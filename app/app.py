@@ -94,12 +94,15 @@ def create_app():
         Webhook HMAC check
         :return:
         """
+        webhook_string = request.get_data(as_text=True)
+
         print(request.headers)
-        relayed_auth_json = request.get_json()
-        print(relayed_auth_json)
+        webhook_json = request.get_json()
+        print(webhook_json)
 
         hmac_request_header = request.headers["Hmacsignature"]
-        if checkHmac(relayed_auth_string, get_adyen_hmac_key(), hmac_request_header):
+        if checkHmac(webhook_string, get_adyen_hmac_key(), hmac_request_header):
+            print("HMAC verified")
             return '[accepted]'
         else:
             return 'Failed HMAC validation'
