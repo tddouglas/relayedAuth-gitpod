@@ -88,9 +88,25 @@ def create_app():
 
         return True
 
+    @app.route('/api/webhooks/bp-notifications', methods=['POST'])
+    def webhook_bp_notifications():
+        """
+        Webhook HMAC check
+        :return:
+        """
+        print(request.headers)
+        relayed_auth_json = request.get_json()
+        print(relayed_auth_json)
+
+        hmac_request_header = request.headers["Hmacsignature"]
+        if checkHmac(relayed_auth_string, get_adyen_hmac_key(), hmac_request_header):
+            return '[accepted]'
+        else:
+            return 'Failed HMAC validation'
+
     # Process incoming webhook notifications
-    @app.route('/api/webhooks/notifications', methods=['POST'])
-    def webhook_notifications():
+    @app.route('/api/webhooks/old-notifications', methods=['POST'])
+    def webhook_old_notifications():
         """
         Receives outcome of each payment
         :return:
