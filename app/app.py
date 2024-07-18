@@ -4,9 +4,58 @@ import hmac
 import hashlib
 import base64
 from Adyen.util import is_valid_hmac_notification
+from functools import wraps
 from flask import Flask, render_template, send_from_directory, request
 
 from main.config import *
+
+VALIDATE_HMAC = True
+VALIDATE_BASIC_AUTH = True
+
+
+def checkHmac(payload, hmac_key, hmac_sig):
+    """
+    Receives outcome of each payment
+    :param payload: Request body represented as a string
+    :param hmac_key: secret HMAC key generated in BPCA
+    :param hmac_sig: HMAC signature in notification header
+    :return: True if HMAC secret key matches key in notification header
+    """
+
+    hmac_key = binascii.a2b_hex(hmac_key)
+    # Calculate signature
+    calculatedHmac = hmac.new(hmac_key, payload.encode('utf-8'), hashlib.sha256).digest()
+    calculatedHmac_b64 = base64.b64encode(calculatedHmac)
+    receivedHmac_b64 = hmac_sig.encode('utf-8')
+    validSignature = hmac.compare_digest(receivedHmac_b64, calculatedHmac_b64)
+
+    if not validSignature:
+        logging.debug('HMAC is invalid: {} {}'.format(receivedHmac_b64, calculatedHmac_b64))
+        return False
+
+    return True
+
+
+def check_auth(username, password):
+    adyen_username, adyen_password = get_adyen_relayed_basic_auth()
+    if not (adyen_username == username and adyen_password == password):
+        return False
+    return True
+
+
+def basic_auth_required(f):
+    @wraps(f)
+    def wrapped_view(**kwargs):
+        if VALIDATE_BASIC_AUTH:
+            auth = request.authorization
+            if not (auth and check_auth(auth.username, auth.password)):
+                return ('Unauthorized', 401, {
+                    'WWW-Authenticate': 'Basic realm="Login Required"'
+                })
+
+            return f(**kwargs)
+
+    return wrapped_view
 
 
 def create_app():
@@ -25,6 +74,7 @@ def create_app():
 
     # Relayed Auth Behavior
     @app.route('/api/webhooks/relayedAuth', methods=['POST'])
+    @basic_auth_required
     def relayedAuth_notification():
         """
         Receives outcome of each payment
@@ -34,9 +84,9 @@ def create_app():
             "authorisationDecision": {
                 "status": "Authorised"
             },
-            "reference": "myBalancePlatformPayment_12345",
+            "reference": "relayed_auth_approve_12345",
             "metadata": {
-                "customId": "your-own-custom-field-12345"
+                "transactionId": "relayed_auth_approve_metadata-123"
             }
         }
 
@@ -44,74 +94,58 @@ def create_app():
             "authorisationDecision": {
                 "status": "Refused"
             },
-            "reference": "myBalancePlatformPayment_12345",
+            "reference": "relayed_auth_decline_123",
             "metadata": {
-                "customId": "your-own-custom-field-12345"
+                "transactionId": "relayed_auth_decline_metadata-123"
             }
         }
         relayed_auth_string = request.get_data(as_text=True)
 
-        print(request.headers)
+        logging.debug(request.headers)
         relayed_auth_json = request.get_json()
-        print(relayed_auth_json)
+        logging.info(f"Relayed Auth body:\n{relayed_auth_json}")
 
-        hmac_request_header = request.headers["Hmacsignature"]
-        if checkHmac(relayed_auth_string, get_adyen_relayed_auth_hmac_key(), hmac_request_header):
-
-            # 9.99 is magic amount to trigger relayed auth decline# 9.99 is magic amount to trigger relayed auth decline
-            if abs(int(relayed_auth_json["amount"]["value"])) == 999:
-                print("Declining transaction as magic value was used")
+        if VALIDATE_HMAC:
+            hmac_request_header = request.headers["Hmacsignature"]
+            if not checkHmac(relayed_auth_string, get_adyen_relayed_auth_hmac_key(), hmac_request_header):
+                logging.info("Invalid HMAC signature in RelayedAuth")
                 return DECLINE
-            else:
-                print("Approving transaction")
-                return APPROVE
 
-    def checkHmac(payload, hmac_key, hmac_sig):
-        """
-        Receives outcome of each payment
-        :param payload: Request body represented as a string
-        :param hmac_key: secret HMAC key generated in BPCA
-        :param hmac_sig: HMAC signature in notification header
-        :return: True if HMAC secret key matches key in notification header
-        """
-
-        hmac_key = binascii.a2b_hex(hmac_key)
-        # Calculate signature
-        calculatedHmac = hmac.new(hmac_key, payload.encode('utf-8'), hashlib.sha256).digest()
-        calculatedHmac_b64 = base64.b64encode(calculatedHmac)
-        receivedHmac_b64 = hmac_sig.encode('utf-8')
-        validSignature = hmac.compare_digest(receivedHmac_b64, calculatedHmac_b64)
-
-        if not validSignature:
-            print('HMAC is invalid: {} {}'.format(receivedHmac_b64, calculatedHmac_b64))
-            return False
-
-        return True
+        # 9.99 is magic amount to trigger relayed auth decline# 9.99 is magic amount to trigger relayed auth decline
+        if abs(int(relayed_auth_json["amount"]["value"])) == 999:
+            logging.info("Declining transaction as magic value was used")
+            return DECLINE
+        else:
+            logging.info("Approving transaction")
+            return APPROVE
 
     @app.route('/api/webhooks/bp-notifications', methods=['POST'])
+    @basic_auth_required
     def webhook_bp_notifications():
         """
-        Webhook HMAC check
+        Process Balance Platform Webhook. checks HMAC and Basic Auth on Webhook if toggles enabled.
         :return:
         """
         webhook_string = request.get_data(as_text=True)
 
-        print(request.headers)
+        logging.debug(request.headers)
         webhook_json = request.get_json()
-        print(webhook_json)
+        logging.info(f"BP Webhook body:\n{webhook_json}")
 
-        hmac_request_header = request.headers["Hmacsignature"]
-        if checkHmac(webhook_string, get_adyen_hmac_key(), hmac_request_header):
-            print("HMAC verified")
-            return '[accepted]'
+        if VALIDATE_HMAC:
+            hmac_request_header = request.headers["Hmacsignature"]
+            if not checkHmac(webhook_string, get_adyen_hmac_key(), hmac_request_header):
+                logging.info("Invalid HMAC signature in BP Webhook")
+                return 'Failed HMAC validation'
         else:
-            return 'Failed HMAC validation'
+            logging.info("Accepting Webhook")
+            return '[accepted]'
 
     # Process incoming webhook notifications
     @app.route('/api/webhooks/old-notifications', methods=['POST'])
     def webhook_old_notifications():
         """
-        Receives outcome of each payment
+        Receives outcome of each payment. HMAC and Basic Auth not implemented on old webhook
         :return:
         """
         notifications = request.json['notificationItems']

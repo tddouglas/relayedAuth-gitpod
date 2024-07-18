@@ -1,4 +1,5 @@
 import os
+from typing import Tuple
 
 from dotenv import load_dotenv, find_dotenv
 
@@ -54,11 +55,24 @@ def get_adyen_relayed_auth_hmac_key():
     return adyen_hmac_key
 
 
+def get_adyen_relayed_basic_auth() -> Tuple[str, str]:
+    adyen_basic_auth_key = os.environ.get("ADYEN_BASIC_AUTH_KEY")
+
+    if not adyen_basic_auth_key:
+        raise Exception("Missing ADYEN_BASIC_AUTH_KEY in .env")
+
+    adyen_basic_auth_value = os.environ.get("ADYEN_BASIC_AUTH_VALUE")
+
+    if not adyen_basic_auth_value:
+        raise Exception("Missing ADYEN_BASIC_AUTH_VALUE in .env")
+
+    return (adyen_basic_auth_key, adyen_basic_auth_value)
+
+
 def get_supported_integration():
     return ['dropin', 'card', 'ideal', 'klarna', 'directEbanking', 'alipay', 'boletobancario',
             'sepadirectdebit', 'dotpay', 'giropay', 'ach', 'paypal', 'applepay',
             'klarna_paynow', 'klarna', 'klarna_account']
-
 
     # Check to make sure variables are set
     # if not merchant_account or not checkout_apikey or not client_key or not hmac_key:
