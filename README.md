@@ -3,13 +3,19 @@
 ## Run this integration in seconds using [Gitpod](https://gitpod.io/)
 
 * Go to [Gitpod account variables](https://gitpod.io/variables).
-* Set the `ADYEN_HMAC_KEY`, `ADYEN_RELAYED_AUTH_HMAC_KEY`, and `ADYEN_BALANCE_PLATFORM` variables.
+* Set the appropriate environment variables:
+  * `ADYEN_BALANCE_PLATFORM` (required).
+  * `ADYEN_HMAC_KEY` (required for webhook hmac validation)
+  * `ADYEN_RELAYED_AUTH_HMAC_KEY` (required for relayed auth hmac validation)
+  * `ADYEN_BASIC_AUTH_KEY` (required for relayed auth basic auth)
+  * `ADYEN_BASIC_AUTH_VALUE` (required for relayed auth basic auth)
 * Click the button below.
 
 [![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/tddouglas/relayedAuth-gitpod)
 
 ## Details
 A simple relayed auth listener - intended to be launched via gitpod and hardcoded to approve all relayed auth transactions except when amount = 9.99. That magic value will result in relayedAuth declines.
+A regular webhook listener is also supported.
 
 ## Requirements
 
@@ -26,7 +32,7 @@ RelayedAuth delivers asynchronous notifications during issuing auth events. It i
 This sample application provides a simple relayed auth endpoint exposed at `/api/webhooks/relayedAuth`. For it to work, you need to:
 
 1. Be running this repo via Gitpod
-2. Setup your relayed auth endpoint to point to your Gitpod instance via the Adyen BPCA. 
+2. Set up your relayed auth endpoint to point to your Gitpod instance via the Adyen BPCA. 
 
 ### Making your server reachable
 Your endpoint that will consume the incoming relayed auth message must be publicly accessible. To easily enabled this, click the "Open in gitpod" button. 
