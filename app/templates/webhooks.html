@@ -1,0 +1,94 @@
+<!-- templates/webhooks.html -->
+<div class="webhook-container">
+    <h2>Webhook Notifications Received:</h2>
+    <div id="webhook-container">
+        <p id="no-webhooks" style="display:none;">No webhooks received yet</p>
+    </div>
+</div>
+
+<script>
+    // Wait for the DOM to be fully loaded
+    document.addEventListener('DOMContentLoaded', function() {
+        const noWebhooksMessage = document.getElementById('no-webhooks');
+        const webhookContainer = document.getElementById('webhook-container');
+
+        // Fetch webhooks every 5 seconds
+        function fetchWebhooks() {
+            fetch('/get_webhooks')
+                .then(response => response.json())
+                .then(data => {
+                    webhookContainer.innerHTML = ''; // Clear existing webhooks
+
+                    if (data.length === 0) {
+                        noWebhooksMessage.style.display = 'block'; // Show "No webhooks received" if empty
+                    } else {
+                        noWebhooksMessage.style.display = 'none'; // Hide "No webhooks received" if data is present
+
+                        // Add new webhooks to the top
+                        data.forEach((webhook, index) => {
+                            const webhookDiv = document.createElement('div');
+                            webhookDiv.className = 'webhook';
+
+                            // Create pre-formatted JSON block
+                            const jsonText = document.createElement('pre');
+                            jsonText.textContent = JSON.stringify(webhook, null, 4); // Pretty-print JSON with 4 spaces
+
+                            // Create copy button
+                            const copyButton = document.createElement('button');
+                            copyButton.textContent = 'Copy';
+                            copyButton.className = 'copy-button';
+                            copyButton.addEventListener('click', () => copyToClipboard(jsonText.textContent));
+
+                            // Append JSON text and copy button to webhook container
+                            webhookDiv.appendChild(copyButton);
+                            webhookDiv.appendChild(jsonText);
+                            webhookContainer.appendChild(webhookDiv);
+                        });
+                    }
+                })
+                .catch(error => console.error('Error fetching webhooks:', error));
+        }
+
+        // Copy webhook data to clipboard
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                alert('Webhook data copied to clipboard');
+            }).catch(err => {
+                console.error('Error copying text: ', err);
+            });
+        }
+
+        // Call fetchWebhooks every 5 seconds
+        setInterval(fetchWebhooks, 5000);
+        fetchWebhooks(); // Initial call when the page loads
+    });
+</script>
+
+
+<style>
+    .webhook-container {
+        margin-top: 20px;
+        padding: 10px;
+    }
+    .webhook {
+        position: relative;
+        background-color: #f4f4f4;
+        border: 1px solid #ddd;
+        padding: 10px;
+        margin-bottom: 10px;
+        white-space: pre-wrap; /* Ensures the JSON is displayed with formatting */
+    }
+    .copy-button {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        padding: 5px 10px;
+        cursor: pointer;
+    }
+    .copy-button:hover {
+        background-color: #0056b3;
+    }
+</style>

@@ -5,12 +5,14 @@ import hashlib
 import base64
 from Adyen.util import is_valid_hmac_notification
 from functools import wraps
-from flask import Flask, render_template, send_from_directory, request
+from flask import Flask, render_template, send_from_directory, request, jsonify
 
 from main.config import *
 
 VALIDATE_HMAC = False
 VALIDATE_BASIC_AUTH = False
+
+webhooks = []
 
 
 def check_hmac(payload, hmac_key, hmac_sig):
@@ -111,6 +113,7 @@ def create_app():
 
         logging.debug(request.headers)
         relayed_auth_json = request.get_json()
+        webhooks.insert(0, relayed_auth_json)
         logging.info(f"Relayed Auth body:\n{relayed_auth_json}")
 
         if VALIDATE_HMAC:
@@ -136,6 +139,7 @@ def create_app():
 
         logging.debug(request.headers)
         webhook_json = request.get_json()
+        webhooks.insert(0, webhook_json)
         logging.info(f"BP Webhook body:\n{webhook_json}")
 
         if VALIDATE_HMAC:
@@ -166,6 +170,11 @@ def create_app():
             raise Exception("Invalid HMAC signature")
 
         return '[accepted]'
+
+    @app.route('/get_webhooks', methods=['GET'])
+    def get_webhooks():
+        # Return the webhooks as JSON
+        return jsonify(webhooks), 200
 
     @app.route('/favicon.ico')
     def favicon():
