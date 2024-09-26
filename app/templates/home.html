@@ -3,9 +3,15 @@
     <div class='main-container'>
         <div class="info">
             <h1>Select Relayed Auth Behavior</h1>
+            <p>Use following domain:</p>
+            <code id="request-url"></code>
             <p>Click to change the approval or decline logic of your relayed auth server.</p>
             <p>To learn more about configuration relayed Auth check out our documentation <a
                     href="https://docs.adyen.com/issuing/authorisation/relayed-authorisation/">here.</a></p>
         </div>
     </div>
+    <script>
+        let relayedUrl = location.protocol + '//' + location.host + location.pathname + "api/webhooks/relayedAuth";
+        document.getElementById("request-url").innerHTML = relayedUrl;
+    </script>
 {% endblock %}

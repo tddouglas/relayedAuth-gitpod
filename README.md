@@ -40,10 +40,8 @@ When launching a gitpod instance, it will be hosted on a URL like:
 ```
 https://tddouglas-relayedauthgi-1bemp1hw5t3.ws-us108.gitpod.io/
 ```
-You will need to take that url and prepend the specific port forwarding info (`8080-`) and append the relayedAuth listener path. The final URL you enter into the Customer Area should look like the below:
-```
-https://8080-tddouglas-relayedauthgi-1bemp1hw5t3.ws-us108.gitpod.io/api/webhooks/relayedAuth
-```
+You will need to take that url and prepend the specific port forwarding info (`8080-`) and append the relayedAuth listener path. This will be displayed on the gitpod relayed auth home page like below. You can copy this URL directly into the BPCA:
+![](gitPod-relayedAuth-example.png)
 **Note:** when starting a new Gitpod workspace the host changes, make sure to **update the Webhook URL** in the Customer Area
 
 ### Set up relayed auth
